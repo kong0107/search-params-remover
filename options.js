@@ -1,20 +1,25 @@
-"use strict";
+const btnSave = document.getElementById("saveButton");
+const ta = document.getElementById("targets");
 
-$("#saveButton").disabled = true;
+btnSave.disabled = true;
 
-getData({targets: ""})
-.then(storage => $("#targets").value = storage.targets);
+chrome.storage.local.get({targets: ""})
+.then(storage => ta.value = storage.targets);
 
-$("#targets").addEventListener("input", () => {
-    $("#saveButton").disabled = false;
+ta.addEventListener("input", () => {
+    btnSave.disabled = false;
+    btnSave.textContent = "Save";
 });
 
-$("#saveButton").addEventListener("click", () => {
-    $("#targets").disabled = true;
-    $("#saveButton").disabled = true;
-    setData({targets: $("#targets").value})
+btnSave.addEventListener("click", () => {
+    ta.disabled = true;
+    btnSave.disabled = true;
+    btnSave.textContent = "Saving...";
+    const targets = ta.value.trim().split("\n").map(s => s.trim()).join("\n");
+    ta.value = targets;
+    chrome.storage.local.set({targets})
     .then(() => {
-        $("#targets").disabled = false;
-        proxy.runtime.sendMessage("targetListUpdated");
+        ta.disabled = false;
+        btnSave.textContent = "Saved";
     });
 });

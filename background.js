@@ -1,62 +1,36 @@
-"use strict";
-
-/**
- * Maintains a global persistent variable.
- */
-let targets = [];
-getData({targets: ""})
-.then(storage => {
-    if(targets.length) return; //< in case that runtime.onInstalled has updated it.
-    targets = storage.targets.split("\n");
-});
-
-
-/**
- * On installation and update
- */
-proxy.runtime.onInstalled.addListener(() => {
-    getData({targets: ""})
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.local.get({targets: ""})
     .then(storage => {
-        const defaultList = "fbclid,utm_source,utm_medium,utm_campaign,utm_term,utm_content".split(",");
-        const currentList = storage.targets.split("\n");
-        targets = currentList.concat(defaultList)
-            .filter((value, index, self) => value && self.indexOf(value) === index)
-        ;
-        setData({targets: targets.join("\n")});
+        if(storage.targets) return;
+        chrome.storage.local.set({targets: "fbclid\nutm_source\nutm_medium\nutm_campaign\nutm_term\nutm_content"});
     });
 });
 
-
-/**
- * Redirect requests.
- */
-const listener = details => {
-    const url = new URL(details.url);
-    const params = url.searchParams;
-    let match = false;
-    console.log("haha", proxy.storage.local.get);
-    targets.forEach(name => {
-        if(!params.has(name)) return;
-        params.delete(name);
-        match = true;
+Promise.all([
+    chrome.storage.local.get({targets: ""}),
+    chrome.declarativeNetRequest.getSessionRules()
+]).then(([storage, rules]) => {
+    const removeParams = storage.targets.split("\n");
+    const removeRuleIds = rules.map(rule => rule.id);
+    chrome.declarativeNetRequest.updateSessionRules({
+        addRules: [{
+            id: 1,
+            priority: 1,
+            condition: {
+                resourceTypes: ["main_frame"]
+            },
+            action: {
+                type: "redirect",
+                redirect: {
+                    transform: {
+                        queryTransform: {
+                            removeParams
+                        }
+                    }
+                }
+            }
+        }],
+        removeRuleIds
     });
-    return match ? {redirectUrl: url.href} : {cancel: false};
-};
-proxy.webRequest.onBeforeRequest.addListener(
-    listener,
-    {urls: ["*://*/*"], types: ["main_frame"]},
-    ["blocking"]
-);
-
-
-/**
- * It's very different for Chrome to block requests asynchronously.
- * The options_ui shall send a message after updating the list
- * and therefore here in background we can update variable `targets`,
- * which is used to check the URL synchronously.
- */
-proxy.runtime.onMessage.addListener(message => {
-    if(message === "targetListUpdated") {
-        getData("targets").then(storage => targets = storage.targets.split("\n"));
-    }
+    console.debug(removeParams);
 });

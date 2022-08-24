@@ -1,13 +1,12 @@
 {
   "name": "search-params-remover",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "a browser extension helps you surf without utm_source and fbclid",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kong0107/search-params-remover.git"
   },
   "keywords": [
-    "WebExtension",
     "fbclid",
     "UTM"
   ],
@@ -15,6 +14,5 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kong0107/search-params-remover/issues"
-  },
-  "homepage": "https://github.com/kong0107/search-params-remover#readme"
+  }
 }
