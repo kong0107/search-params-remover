@@ -1,0 +1,8 @@
+utm_source
+utm_medium
+utm_campaign
+utm_term
+utm_content
+fbclid
+__tn__
+__cft__[0]

@@ -3,8 +3,8 @@ const ta = document.getElementById("removeParams");
 
 btnSave.disabled = true;
 
-chrome.storage.local.get({removeParams: ""})
-.then(storage => ta.value = storage.removeParams);
+chrome.storage.local.get({removeParams: []})
+.then(({removeParams}) => ta.value = removeParams.join("\n"));
 
 ta.addEventListener("input", () => {
     btnSave.disabled = false;
@@ -18,10 +18,8 @@ btnSave.addEventListener("click", () => {
     const removeParams = ta.value.split("\n").filter(x => !!x).map(s => s.trim());
     ta.value = removeParams.join("\n");
 
-    Promise.all([
-        chrome.storage.local.set({removeParams: ta.value}),
-        chrome.runtime.sendMessage({command: "loadRemoveParams", removeParams})
-    ]).then(() => {
+    chrome.storage.local.set({removeParams})
+    .then(() => {
         ta.disabled = false;
         btnSave.textContent = "Saved";
     });

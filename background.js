@@ -1,42 +1,27 @@
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.get({removeParams: ""})
-    .then(storage => {
-        if(storage.removeParams) return;
-        chrome.storage.local.set({removeParams: "fbclid\nutm_source\nutm_medium\nutm_campaign\nutm_term\nutm_content"});
-    });
+chrome.runtime.onInstalled.addListener(async() => {
+    console.debug("runtime.onInstalled");
+    let {removeParams} = await chrome.storage.local.get({removeParams: null});
+    if(removeParams?.forEach) return;
+
+    if(removeParams === null) {
+        // new installed
+        const defaultRP = await fetch(chrome.runtime.getURL("defaultRemoveParams.txt")).then(res => res.text());
+        removeParams = defaultRP.split(/\s+/);
+    }
+    else if(typeof removeParams === "string") {
+        // updated from v0.1
+        removeParams = removeParams.split(/\s+/);
+    }
+    chrome.storage.local.set({removeParams});
 });
 
-chrome.runtime.onMessage.addListener((request, _, callback) => {
-    if(request.command !== "loadRemoveParams")
-        return console.error("unknown command " + request.command);
-    loadRemoveParams(request.removeParams).then(callback);
-    return true;
-});
-
-Promise.all([
-    chrome.storage.local.get({removeParams: ""}),
-    chrome.declarativeNetRequest.getSessionRules()
-]).then(([storage, rules]) => {
-    const removeParams = storage.removeParams.split("\n");
-    loadRemoveParams(removeParams, rules);
-});
-
-
-/**
- * Functions
- */
-
-/**
- * Reload redirecting rule by removing all and adding new one.
- * @param {string[]} removeParams
- * @param {Rule} currentRules
- */
-async function loadRemoveParams(removeParams, currentRules = null) {
-    if(!currentRules)
-        currentRules = await chrome.declarativeNetRequest.getSessionRules();
-
+chrome.storage.onChanged.addListener(async(changes) => {
+    console.debug("storage.onChanged");
+    if(!changes.removeParams) return;
+    const removeParams = changes.removeParams.newValue ?? [];
+    const currentRules = await chrome.declarativeNetRequest.getDynamicRules();
     const removeRuleIds = currentRules.map(rule => rule.id);
-    await chrome.declarativeNetRequest.updateSessionRules({
+    chrome.declarativeNetRequest.updateDynamicRules({
         addRules: [{
             id: 1,
             priority: 1,
@@ -52,4 +37,4 @@ async function loadRemoveParams(removeParams, currentRules = null) {
         }],
         removeRuleIds
     });
-}
+});

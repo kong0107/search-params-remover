@@ -1,6 +1,6 @@
 {
   "name": "search-params-remover",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "a browser extension helps you surf without utm_source and fbclid",
   "repository": {
     "type": "git",
