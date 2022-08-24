@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Search Params Remover",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "a browser extension helps you surf without utm_source and fbclid",
     "author": "kong0107",
     "icons" : {
