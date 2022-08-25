@@ -1,11 +1,22 @@
 # search-params-remover
-a browser extension helps you surf without fbclid, [UTM parameters](https://en.wikipedia.org/wiki/UTM_parameters), and parameters you specify.
+This is a browser extension helps you surf without fbclid, [UTM parameters](https://en.wikipedia.org/wiki/UTM_parameters), and parameters you specify.
+Not only search params (with "?" preceding) is removed, but also substrings with format `key=value` in `hash` (with "#" preceding) would be removed.
+
+## Examples (requirements)
+* example.com/path?a=3&fbclid=xxx&b=4&b=5
+  => `example.com/path?a=3&b=4&b=5`
+* example.com/path#utm_term=condom&comments
+  => `example.com/path#comments`
+* example.com/path?fbclid=xxx#utm_term=condom
+  => `example.com/path`
+
+note: example.com is a valid website. After installing the extension, you can click the above links to check if the results fit.
 
 ## Versions
 `v0.2.x` is based for Chrome-based browsers such as Microsoft Edge.
-Firefox users may install [v0.1](https://github.com/kong0107/search-params-remover/releases/tag/v0.1) instead (due to manifest version issue).
+Firefox users may install [v0.1](https://github.com/kong0107/search-params-remover/releases/tag/v0.1) instead (due to manifest version issue), without modifying `hash` function.
 
-## development notes
+## Development notes
 
 * I suggest only reloading rules by listening to `StorageArea.onChanged`;
   otherwise codes would be confusing.
