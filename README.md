@@ -7,5 +7,10 @@ Firefox users may install [v0.1](https://github.com/kong0107/search-params-remov
 
 ## development notes
 
-* While updating the params to be removed, write them to storage, and then the listener added to `StorageArea.onChanged` will reload redirect rules.
+* I suggest only reloading rules by listening to `StorageArea.onChanged`;
+  otherwise codes would be confusing.
 * Firefox has not decided how to do with Manifest V3.
+* [declarativeNetRequest](https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/) seems not having ways for `hash` to do things such as what `QueryTransform` does;
+  and a question mark is still remained in `href` even though all params are removed and `search` is empty.
+  These issues are handled in `content.js`.
+  (`regexSubstitution` may work but I don't wanna try yet.)
